@@ -1,0 +1,267 @@
+import { create } from "zustand";
+
+import { interpretBlockSyntax } from "../domain/blockSyntax";
+import {
+  createBlock,
+  isScheduledOn,
+  type EntityId,
+  type InboxEntry,
+  type TaskItem,
+  type WorkspaceDocument,
+  type WorkspaceNote,
+} from "../domain/entities";
+import { taskScheduling, defaultCalendar } from "../domain/taskScheduling";
+import { buildSampleWorkspace } from "./sampleData";
+import type { WorkspaceStoreState } from "./workspaceStoreTypes";
+
+function matchesAgendaFilters(
+  task: TaskItem,
+  store: WorkspaceStoreState,
+  areaID?: EntityId | null,
+  initiativeID?: EntityId | null,
+  outcomeID?: EntityId | null,
+): boolean {
+  return (
+    (areaID == null || store.resolvedAreaID(task) === areaID) &&
+    (initiativeID == null || store.resolvedInitiativeID(task) === initiativeID) &&
+    (outcomeID == null || store.resolvedOutcomeID(task) === outcomeID)
+  );
+}
+
+export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
+  const sample = buildSampleWorkspace();
+
+  const resolveHelpers = {
+    area: (id: EntityId | null | undefined) =>
+      id ? get().areas.find((a) => a.id === id) : undefined,
+    initiative: (id: EntityId | null | undefined) =>
+      id ? get().initiatives.find((i) => i.id === id) : undefined,
+    outcome: (id: EntityId | null | undefined) =>
+      id ? get().outcomes.find((o) => o.id === id) : undefined,
+    resolvedAreaID: (task: TaskItem): EntityId | null => {
+      if (task.areaID) {
+        return task.areaID;
+      }
+      const fromInitiative = get().initiative(task.initiativeID)?.areaID ?? null;
+      if (fromInitiative) {
+        return fromInitiative;
+      }
+      const resolvedInit = get().resolvedInitiativeID(task);
+      return get().initiative(resolvedInit)?.areaID ?? null;
+    },
+    resolvedOutcomeID: (task: TaskItem): EntityId | null =>
+      task.outcomeID ??
+      get().milestones.find((m) => m.id === task.milestoneID)?.outcomeID ??
+      null,
+    resolvedInitiativeID: (task: TaskItem): EntityId | null =>
+      task.initiativeID ?? get().outcome(get().resolvedOutcomeID(task))?.initiativeID ?? null,
+  };
+
+  return {
+    inboxEntries: [
+      { id: crypto.randomUUID(), text: "Think about referral program", createdAt: new Date() },
+      { id: crypto.randomUUID(), text: "Research launch campaign", createdAt: new Date() },
+      { id: crypto.randomUUID(), text: "Review onboarding copy", createdAt: new Date() },
+    ],
+    ...sample,
+
+    ...resolveHelpers,
+
+    tasksForAgendaOn(date, filters, calendar = defaultCalendar) {
+      const state = get();
+      return state.tasks.filter((task) => {
+        const hasWork = state.taskWorkLogs.some(
+          (log) => log.taskID === task.id && calendar.isSameDay(log.workDate, date),
+        );
+        return (
+          matchesAgendaFilters(
+            task,
+            state,
+            filters?.areaID,
+            filters?.initiativeID,
+            filters?.outcomeID,
+          ) &&
+          (isScheduledOn(task, date, calendar) || hasWork)
+        );
+      });
+    },
+
+    toggleTask(taskID) {
+      set((state) => ({
+        tasks: state.tasks.map((t) =>
+          t.id === taskID
+            ? { ...t, status: t.status === "done" ? "notStarted" : "done" }
+            : t,
+        ),
+      }));
+    },
+
+    addDocument(name = "") {
+      const doc: WorkspaceDocument = {
+        id: crypto.randomUUID(),
+        name,
+        initiativeID: null,
+        outcomeID: null,
+        blocks: [createBlock()],
+      };
+      set((state) => ({ docs: [doc, ...state.docs] }));
+      return doc.id;
+    },
+
+    addNote(name = "") {
+      const note: WorkspaceNote = {
+        id: crypto.randomUUID(),
+        name,
+        outcomeID: null,
+        blocks: [createBlock()],
+      };
+      set((state) => ({ notes: [note, ...state.notes] }));
+      return note.id;
+    },
+
+    updateDocumentName(documentID, name) {
+      set((state) => ({
+        docs: state.docs.map((d) => (d.id === documentID ? { ...d, name } : d)),
+      }));
+    },
+
+    updateNoteName(noteID, name) {
+      set((state) => ({
+        notes: state.notes.map((n) => (n.id === noteID ? { ...n, name } : n)),
+      }));
+    },
+
+    updateDocumentBlock(documentID, blockID, patch) {
+      set((state) => ({
+        docs: state.docs.map((doc) => {
+          if (doc.id !== documentID) {
+            return doc;
+          }
+          return {
+            ...doc,
+            blocks: doc.blocks.map((b) => (b.id === blockID ? { ...b, ...patch } : b)),
+          };
+        }),
+      }));
+    },
+
+    addDocumentBlock(documentID, afterBlockID, type = "paragraph", text = "") {
+      const block = createBlock({ type, text });
+      let inserted: EntityId | null = block.id;
+      set((state) => ({
+        docs: state.docs.map((doc) => {
+          if (doc.id !== documentID) {
+            return doc;
+          }
+          const blocks = [...doc.blocks];
+          if (afterBlockID) {
+            const idx = blocks.findIndex((b) => b.id === afterBlockID);
+            if (idx >= 0) {
+              blocks.splice(idx + 1, 0, block);
+            } else {
+              blocks.push(block);
+            }
+          } else {
+            blocks.push(block);
+          }
+          return { ...doc, blocks };
+        }),
+      }));
+      return inserted;
+    },
+
+    interpretDocumentSyntax(documentID, blockID) {
+      set((state) => ({
+        docs: state.docs.map((doc) => {
+          if (doc.id !== documentID) {
+            return doc;
+          }
+          return {
+            ...doc,
+            blocks: doc.blocks.map((b) =>
+              b.id === blockID ? interpretBlockSyntax(b) : b,
+            ),
+          };
+        }),
+      }));
+    },
+
+    addInboxEntry(text) {
+      const entry: InboxEntry = { id: crypto.randomUUID(), text, createdAt: new Date() };
+      set((state) => ({ inboxEntries: [entry, ...state.inboxEntries] }));
+    },
+
+    addArea(name, icon) {
+      set((state) => ({
+        areas: [...state.areas, { id: crypto.randomUUID(), name, icon }],
+      }));
+    },
+
+    logWork(taskID, date = new Date(), calendar = defaultCalendar) {
+      const day = taskScheduling.normalizedDay(date, calendar);
+      const state = get();
+      if (
+        state.taskWorkLogs.some(
+          (log) => log.taskID === taskID && calendar.isSameDay(log.workDate, day),
+        )
+      ) {
+        return;
+      }
+      set((s) => ({
+        taskWorkLogs: [
+          ...s.taskWorkLogs,
+          { id: crypto.randomUUID(), taskID, workDate: day },
+        ],
+        tasks: s.tasks.map((t) =>
+          t.id === taskID && t.status === "notStarted" ? { ...t, status: "inProgress" } : t,
+        ),
+      }));
+    },
+
+    addInitiative(name, areaID, status) {
+      set((state) => ({
+        initiatives: [
+          ...state.initiatives,
+          { id: crypto.randomUUID(), name, areaID, status },
+        ],
+      }));
+    },
+
+    addOutcome(name, initiativeID, status, targetDate) {
+      set((state) => ({
+        outcomes: [
+          ...state.outcomes,
+          { id: crypto.randomUUID(), name, initiativeID, status, targetDate },
+        ],
+      }));
+    },
+
+    addTask(input) {
+      const period = input.scheduledStart
+        ? taskScheduling.normalizedPeriod(
+            input.scheduledStart,
+            input.scheduledEnd,
+            defaultCalendar,
+          )
+        : null;
+      set((state) => ({
+        tasks: [
+          ...state.tasks,
+          {
+            id: crypto.randomUUID(),
+            name: input.name,
+            areaID: input.areaID,
+            initiativeID: input.initiativeID,
+            outcomeID: input.outcomeID,
+            milestoneID: null,
+            status: "notStarted",
+            priority: input.priority,
+            scheduledStart: period?.start ?? null,
+            scheduledEnd: period?.end ?? null,
+            dueDate: input.dueDate ?? null,
+          },
+        ],
+      }));
+    },
+  };
+});
