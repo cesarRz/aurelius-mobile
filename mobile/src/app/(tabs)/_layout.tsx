@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import type { ComponentProps, JSX } from "react";
-import type { ColorValue } from "react-native";
+import { View, type ColorValue } from "react-native";
+
+import { CreateActionFAB } from "@/components/CreateActionFAB";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -11,6 +13,7 @@ function TabIcon({ name, color }: { name: IoniconName; color: ColorValue }): JSX
 
 export default function TabsLayout(): JSX.Element {
   return (
+    <View className="flex-1">
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen
         name="agenda"
@@ -41,5 +44,7 @@ export default function TabsLayout(): JSX.Element {
         }}
       />
     </Tabs>
+    <CreateActionFAB />
+    </View>
   );
 }

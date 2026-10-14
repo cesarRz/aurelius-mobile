@@ -67,6 +67,39 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
 
     ...resolveHelpers,
 
+    initiativesForArea(areaID) {
+      return get().initiatives.filter((i) => i.areaID === areaID);
+    },
+
+    outcomesForInitiative(initiativeID) {
+      return get().outcomes.filter((o) => o.initiativeID === initiativeID);
+    },
+
+    tasksForInitiative(initiativeID) {
+      return get().tasks.filter((t) => get().resolvedInitiativeID(t) === initiativeID);
+    },
+
+    tasksForOutcome(outcomeID) {
+      return get().tasks.filter((t) => get().resolvedOutcomeID(t) === outcomeID);
+    },
+
+    docsForOutcome(outcomeID) {
+      return get().docs.filter((d) => d.outcomeID === outcomeID);
+    },
+
+    notesForOutcome(outcomeID) {
+      return get().notes.filter((n) => n.outcomeID === outcomeID);
+    },
+
+    progressForOutcome(outcomeID) {
+      const relevant = get().tasksForOutcome(outcomeID);
+      if (relevant.length === 0) {
+        return 0;
+      }
+      const completed = relevant.filter((t) => t.status === "done").length;
+      return completed / relevant.length;
+    },
+
     tasksForAgendaOn(date, filters, calendar = defaultCalendar) {
       const state = get();
       return state.tasks.filter((task) => {
@@ -197,6 +230,12 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       }));
     },
 
+    updateArea(id, name, icon) {
+      set((state) => ({
+        areas: state.areas.map((a) => (a.id === id ? { ...a, name, icon } : a)),
+      }));
+    },
+
     logWork(taskID, date = new Date(), calendar = defaultCalendar) {
       const day = taskScheduling.normalizedDay(date, calendar);
       const state = get();
@@ -218,6 +257,15 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       }));
     },
 
+    addMilestone(name, outcomeID) {
+      set((state) => ({
+        milestones: [
+          ...state.milestones,
+          { id: crypto.randomUUID(), name, outcomeID, isCompleted: false },
+        ],
+      }));
+    },
+
     addInitiative(name, areaID, status) {
       set((state) => ({
         initiatives: [
@@ -227,12 +275,109 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       }));
     },
 
+    updateInitiative(id, name, areaID, status) {
+      set((state) => ({
+        initiatives: state.initiatives.map((i) =>
+          i.id === id ? { ...i, name, areaID, status } : i,
+        ),
+      }));
+    },
+
     addOutcome(name, initiativeID, status, targetDate) {
       set((state) => ({
         outcomes: [
           ...state.outcomes,
           { id: crypto.randomUUID(), name, initiativeID, status, targetDate },
         ],
+      }));
+    },
+
+    updateOutcome(id, name, initiativeID, status, targetDate) {
+      set((state) => ({
+        outcomes: state.outcomes.map((o) =>
+          o.id === id ? { ...o, name, initiativeID, status, targetDate } : o,
+        ),
+      }));
+    },
+
+    updateTask(input) {
+      const period = input.scheduledStart
+        ? taskScheduling.normalizedPeriod(
+            input.scheduledStart,
+            input.scheduledEnd,
+            defaultCalendar,
+          )
+        : null;
+      set((state) => ({
+        tasks: state.tasks.map((t) =>
+          t.id === input.id
+            ? {
+                ...t,
+                name: input.name,
+                areaID: input.areaID,
+                initiativeID: input.initiativeID,
+                outcomeID: input.outcomeID,
+                priority: input.priority,
+                scheduledStart: period?.start ?? null,
+                scheduledEnd: period?.end ?? null,
+                dueDate: input.dueDate,
+              }
+            : t,
+        ),
+      }));
+    },
+
+    updateNoteBlock(noteID, blockID, patch) {
+      set((state) => ({
+        notes: state.notes.map((note) => {
+          if (note.id !== noteID) {
+            return note;
+          }
+          return {
+            ...note,
+            blocks: note.blocks.map((b) => (b.id === blockID ? { ...b, ...patch } : b)),
+          };
+        }),
+      }));
+    },
+
+    addNoteBlock(noteID, afterBlockID, type = "paragraph", text = "") {
+      const block = createBlock({ type, text });
+      set((state) => ({
+        notes: state.notes.map((note) => {
+          if (note.id !== noteID) {
+            return note;
+          }
+          const blocks = [...note.blocks];
+          if (afterBlockID) {
+            const idx = blocks.findIndex((b) => b.id === afterBlockID);
+            if (idx >= 0) {
+              blocks.splice(idx + 1, 0, block);
+            } else {
+              blocks.push(block);
+            }
+          } else {
+            blocks.push(block);
+          }
+          return { ...note, blocks };
+        }),
+      }));
+      return block.id;
+    },
+
+    interpretNoteSyntax(noteID, blockID) {
+      set((state) => ({
+        notes: state.notes.map((note) => {
+          if (note.id !== noteID) {
+            return note;
+          }
+          return {
+            ...note,
+            blocks: note.blocks.map((b) =>
+              b.id === blockID ? interpretBlockSyntax(b) : b,
+            ),
+          };
+        }),
       }));
     },
 

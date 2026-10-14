@@ -15,7 +15,9 @@
       }
     },
     "android": {
-      "permissions": ["android.permission.RECORD_AUDIO"],
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -34,7 +36,8 @@
         }
       ],
       "expo-status-bar",
-      "expo-speech-recognition"
+      "expo-speech-recognition",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
