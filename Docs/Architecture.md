@@ -1,5 +1,7 @@
 # Arquitectura de Aurelius
 
+> **Cliente móvil cross-platform:** la app Expo + HeroUI Native vive en `mobile/`. Ver [Migration-Expo.md](./Migration-Expo.md).
+
 SwiftUI con organización por funcionalidad y un store observable compartido.
 Las vistas describen la interfaz, las entidades representan los datos y el store
 coordina el estado del workspace. Un ViewModel por pantalla se añade cuando exista

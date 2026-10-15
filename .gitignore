@@ -6,3 +6,8 @@ xcuserdata/
 
 # macOS Finder metadata
 .DS_Store
+
+# Expo / Node (Aurelius mobile)
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
