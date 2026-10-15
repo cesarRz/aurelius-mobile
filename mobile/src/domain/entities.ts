@@ -1,3 +1,4 @@
+import { newEntityId } from "../lib/newEntityId";
 import { taskScheduling, type CalendarLike, defaultCalendar } from "./taskScheduling";
 
 export type WorkStatus = "notStarted" | "inProgress" | "done";
@@ -155,7 +156,7 @@ export function splitOnReturn(text: string): { kept: string; remainder: string }
 
 export function createBlock(partial?: Partial<DocumentBlock>): DocumentBlock {
   return {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     type: partial?.type ?? "paragraph",
     text: partial?.text ?? "",
     isChecked: partial?.isChecked ?? false,

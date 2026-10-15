@@ -1,4 +1,5 @@
 import { createBlock } from "../domain/entities";
+import { newEntityId } from "../lib/newEntityId";
 import type {
   ActiveThread,
   Area,
@@ -31,31 +32,31 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
   const yesterday = calendar.addDays(today, -1);
   const dayAfterTomorrow = calendar.addDays(today, 2);
 
-  const business: Area = { id: crypto.randomUUID(), name: "Business", icon: "briefcase" };
-  const personal: Area = { id: crypto.randomUUID(), name: "Personal", icon: "person" };
-  const health: Area = { id: crypto.randomUUID(), name: "Health", icon: "heart" };
+  const business: Area = { id: newEntityId(), name: "Business", icon: "briefcase" };
+  const personal: Area = { id: newEntityId(), name: "Personal", icon: "person" };
+  const health: Area = { id: newEntityId(), name: "Health", icon: "heart" };
   const areas = [business, personal, health];
 
   const bilanz: Initiative = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Bilanz",
     areaID: business.id,
     status: "inProgress",
   };
   const personalBrand: Initiative = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Personal Brand",
     areaID: business.id,
     status: "inProgress",
   };
   const homeRenovation: Initiative = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Home Renovation",
     areaID: personal.id,
     status: "inProgress",
   };
   const halfMarathon: Initiative = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Half Marathon",
     areaID: health.id,
     status: "inProgress",
@@ -63,42 +64,42 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
   const initiatives = [bilanz, personalBrand, homeRenovation, halfMarathon];
 
   const launch: Outcome = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Launch Bilanz publicly",
     initiativeID: bilanz.id,
     status: "inProgress",
     targetDate: calendar.addDays(today, 45),
   };
   const firstUsers: Outcome = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Reach first 100 paying users",
     initiativeID: bilanz.id,
     status: "notStarted",
     targetDate: calendar.addDays(today, 90),
   };
   const content: Outcome = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Publish consistently for 30 days",
     initiativeID: personalBrand.id,
     status: "inProgress",
     targetDate: calendar.addDays(today, 30),
   };
   const kitchenRefresh: Outcome = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Refresh kitchen before holidays",
     initiativeID: homeRenovation.id,
     status: "inProgress",
     targetDate: calendar.addDays(today, 60),
   };
   const raceDay: Outcome = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Run the city half marathon",
     initiativeID: halfMarathon.id,
     status: "inProgress",
     targetDate: calendar.addDays(today, 60),
   };
   const referralProgram: Outcome = {
-    id: crypto.randomUUID(),
+    id: newEntityId(),
     name: "Launch referral program",
     initiativeID: bilanz.id,
     status: "notStarted",
@@ -107,15 +108,15 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
   const outcomes = [launch, firstUsers, content, kitchenRefresh, raceDay, referralProgram];
 
   const milestones: Milestone[] = [
-    { id: crypto.randomUUID(), name: "Beta completed", outcomeID: launch.id, isCompleted: true },
-    { id: crypto.randomUUID(), name: "Onboarding complete", outcomeID: launch.id },
-    { id: crypto.randomUUID(), name: "App Store submission", outcomeID: launch.id },
-    { id: crypto.randomUUID(), name: "Public launch", outcomeID: launch.id },
+    { id: newEntityId(), name: "Beta completed", outcomeID: launch.id, isCompleted: true },
+    { id: newEntityId(), name: "Onboarding complete", outcomeID: launch.id },
+    { id: newEntityId(), name: "App Store submission", outcomeID: launch.id },
+    { id: newEntityId(), name: "Public launch", outcomeID: launch.id },
   ];
 
   const tasks: TaskItem[] = [
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Finish onboarding flow",
       areaID: business.id,
       initiativeID: bilanz.id,
@@ -128,7 +129,7 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
       dueDate: calendar.addDays(today, 3),
     },
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Record launch video",
       areaID: business.id,
       initiativeID: bilanz.id,
@@ -141,7 +142,7 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
       dueDate: null,
     },
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Rewrite pricing page",
       areaID: business.id,
       initiativeID: bilanz.id,
@@ -154,7 +155,7 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
       dueDate: calendar.addDays(today, 5),
     },
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Outline 4 LinkedIn posts",
       areaID: business.id,
       initiativeID: personalBrand.id,
@@ -167,7 +168,7 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
       dueDate: null,
     },
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Compare countertop quotes",
       areaID: personal.id,
       initiativeID: homeRenovation.id,
@@ -180,7 +181,7 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
       dueDate: null,
     },
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Map referral reward flow",
       areaID: business.id,
       initiativeID: bilanz.id,
@@ -195,20 +196,20 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
   ];
 
   const taskWorkLogs: TaskWorkLog[] = [
-    { id: crypto.randomUUID(), taskID: tasks[0].id, workDate: today },
-    { id: crypto.randomUUID(), taskID: tasks[2].id, workDate: yesterday },
-    { id: crypto.randomUUID(), taskID: tasks[5].id, workDate: yesterday },
+    { id: newEntityId(), taskID: tasks[0].id, workDate: today },
+    { id: newEntityId(), taskID: tasks[2].id, workDate: yesterday },
+    { id: newEntityId(), taskID: tasks[5].id, workDate: yesterday },
   ];
 
   const threads: ActiveThread[] = [
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Onboarding UX",
       outcomeID: launch.id,
       detail: "Working through onboarding flow, copy and interaction details.",
     },
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Subscription strategy",
       outcomeID: launch.id,
       detail: "Deciding how the freemium limits and premium conversion should work.",
@@ -217,7 +218,7 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
 
   const docs: WorkspaceDocument[] = [
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Launch Strategy",
       initiativeID: bilanz.id,
       outcomeID: launch.id,
@@ -238,7 +239,7 @@ export function buildSampleWorkspace(): SampleWorkspaceSlice {
 
   const notes: WorkspaceNote[] = [
     {
-      id: crypto.randomUUID(),
+      id: newEntityId(),
       name: "Launch Notes",
       outcomeID: launch.id,
       blocks: [

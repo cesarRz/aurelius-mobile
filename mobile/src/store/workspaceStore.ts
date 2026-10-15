@@ -11,6 +11,7 @@ import {
   type WorkspaceNote,
 } from "../domain/entities";
 import { taskScheduling, defaultCalendar } from "../domain/taskScheduling";
+import { newEntityId } from "../lib/newEntityId";
 import { buildSampleWorkspace } from "./sampleData";
 import type { WorkspaceStoreState } from "./workspaceStoreTypes";
 
@@ -59,9 +60,9 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
 
   return {
     inboxEntries: [
-      { id: crypto.randomUUID(), text: "Think about referral program", createdAt: new Date() },
-      { id: crypto.randomUUID(), text: "Research launch campaign", createdAt: new Date() },
-      { id: crypto.randomUUID(), text: "Review onboarding copy", createdAt: new Date() },
+      { id: newEntityId(), text: "Think about referral program", createdAt: new Date() },
+      { id: newEntityId(), text: "Research launch campaign", createdAt: new Date() },
+      { id: newEntityId(), text: "Review onboarding copy", createdAt: new Date() },
     ],
     ...sample,
 
@@ -131,7 +132,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
 
     addDocument(name = "") {
       const doc: WorkspaceDocument = {
-        id: crypto.randomUUID(),
+        id: newEntityId(),
         name,
         initiativeID: null,
         outcomeID: null,
@@ -143,7 +144,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
 
     addNote(name = "") {
       const note: WorkspaceNote = {
-        id: crypto.randomUUID(),
+        id: newEntityId(),
         name,
         outcomeID: null,
         blocks: [createBlock()],
@@ -220,13 +221,13 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
     },
 
     addInboxEntry(text) {
-      const entry: InboxEntry = { id: crypto.randomUUID(), text, createdAt: new Date() };
+      const entry: InboxEntry = { id: newEntityId(), text, createdAt: new Date() };
       set((state) => ({ inboxEntries: [entry, ...state.inboxEntries] }));
     },
 
     addArea(name, icon) {
       set((state) => ({
-        areas: [...state.areas, { id: crypto.randomUUID(), name, icon }],
+        areas: [...state.areas, { id: newEntityId(), name, icon }],
       }));
     },
 
@@ -251,7 +252,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       set((s) => ({
         taskWorkLogs: [
           ...s.taskWorkLogs,
-          { id: crypto.randomUUID(), taskID, workDate: day },
+          { id: newEntityId(), taskID, workDate: day },
         ],
         tasks: s.tasks.map((t) =>
           t.id === taskID && t.status === "notStarted" ? { ...t, status: "inProgress" } : t,
@@ -310,7 +311,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       set((state) => ({
         milestones: [
           ...state.milestones,
-          { id: crypto.randomUUID(), name, outcomeID, isCompleted: false },
+          { id: newEntityId(), name, outcomeID, isCompleted: false },
         ],
       }));
     },
@@ -319,7 +320,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       set((state) => ({
         initiatives: [
           ...state.initiatives,
-          { id: crypto.randomUUID(), name, areaID, status },
+          { id: newEntityId(), name, areaID, status },
         ],
       }));
     },
@@ -336,7 +337,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       set((state) => ({
         outcomes: [
           ...state.outcomes,
-          { id: crypto.randomUUID(), name, initiativeID, status, targetDate },
+          { id: newEntityId(), name, initiativeID, status, targetDate },
         ],
       }));
     },
@@ -442,7 +443,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
         tasks: [
           ...state.tasks,
           {
-            id: crypto.randomUUID(),
+            id: newEntityId(),
             name: input.name,
             areaID: input.areaID,
             initiativeID: input.initiativeID,
