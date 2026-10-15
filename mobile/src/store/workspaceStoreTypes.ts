@@ -63,6 +63,16 @@ export interface WorkspaceStoreState {
   addArea: (name: string, icon: string) => void;
   updateArea: (id: EntityId, name: string, icon: string) => void;
   logWork: (taskID: EntityId, date?: Date, calendar?: CalendarLike) => void;
+  hasWorkLog: (taskID: EntityId, date: Date, calendar?: CalendarLike) => boolean;
+  removeWorkLog: (taskID: EntityId, date: Date, calendar?: CalendarLike) => void;
+  scheduleWork: (
+    taskID: EntityId,
+    from: Date,
+    to?: Date | null,
+    calendar?: CalendarLike,
+  ) => void;
+  pushScheduledWork: (taskID: EntityId, days?: number, calendar?: CalendarLike) => void;
+  clearSchedule: (taskID: EntityId) => void;
   addMilestone: (name: string, outcomeID: EntityId) => void;
   updateInitiative: (
     id: EntityId,

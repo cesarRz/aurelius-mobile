@@ -236,14 +236,16 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       }));
     },
 
+    hasWorkLog(taskID, date, calendar = defaultCalendar) {
+      const day = taskScheduling.normalizedDay(date, calendar);
+      return get().taskWorkLogs.some(
+        (log) => log.taskID === taskID && calendar.isSameDay(log.workDate, day),
+      );
+    },
+
     logWork(taskID, date = new Date(), calendar = defaultCalendar) {
       const day = taskScheduling.normalizedDay(date, calendar);
-      const state = get();
-      if (
-        state.taskWorkLogs.some(
-          (log) => log.taskID === taskID && calendar.isSameDay(log.workDate, day),
-        )
-      ) {
+      if (get().hasWorkLog(taskID, day, calendar)) {
         return;
       }
       set((s) => ({
@@ -253,6 +255,53 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
         ],
         tasks: s.tasks.map((t) =>
           t.id === taskID && t.status === "notStarted" ? { ...t, status: "inProgress" } : t,
+        ),
+      }));
+    },
+
+    removeWorkLog(taskID, date, calendar = defaultCalendar) {
+      const day = taskScheduling.normalizedDay(date, calendar);
+      set((s) => ({
+        taskWorkLogs: s.taskWorkLogs.filter(
+          (log) => !(log.taskID === taskID && calendar.isSameDay(log.workDate, day)),
+        ),
+      }));
+    },
+
+    scheduleWork(taskID, from, to, calendar = defaultCalendar) {
+      const period = taskScheduling.normalizedPeriod(from, to ?? from, calendar);
+      set((s) => ({
+        tasks: s.tasks.map((t) =>
+          t.id === taskID
+            ? { ...t, scheduledStart: period.start, scheduledEnd: period.end }
+            : t,
+        ),
+      }));
+    },
+
+    pushScheduledWork(taskID, days = 1, calendar = defaultCalendar) {
+      const task = get().tasks.find((t) => t.id === taskID);
+      if (!task?.scheduledStart) {
+        return;
+      }
+      const start = task.scheduledStart;
+      const end = task.scheduledEnd ?? start;
+      const shiftedStart = calendar.addDays(start, days);
+      const shiftedEnd = calendar.addDays(end, days);
+      const period = taskScheduling.normalizedPeriod(shiftedStart, shiftedEnd, calendar);
+      set((s) => ({
+        tasks: s.tasks.map((t) =>
+          t.id === taskID
+            ? { ...t, scheduledStart: period.start, scheduledEnd: period.end }
+            : t,
+        ),
+      }));
+    },
+
+    clearSchedule(taskID) {
+      set((s) => ({
+        tasks: s.tasks.map((t) =>
+          t.id === taskID ? { ...t, scheduledStart: null, scheduledEnd: null } : t,
         ),
       }));
     },
