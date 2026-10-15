@@ -35,17 +35,29 @@ The SwiftUI app remains in `Aurelius/` for reference. The active cross-platform 
 
 ## Run
 
+Use a **development build** (not Expo Go) for drawing blocks and inbox dictation—those modules need native code from this project.
+
 ```bash
 cd mobile
-npm run start    # Metro
-npm run ios
-npm run android
+npm install
+npx expo run:ios      # or: npx expo run:android
+npm run start         # Metro (after native app is installed)
 npm run typecheck
 npm test
 ```
 
+Deep links use the `aurelius://` URL scheme (`app.json` → `expo.scheme`).
+
+## Screen parity (current)
+
+- Tabs: Agenda, Planning, Docs, More
+- Modals: area, initiative, outcome, task, milestone forms
+- Document / note block editors, outcome workspace, inbox capture
+- Agenda filters, grouping, and long-press task actions (Swift parity)
+
 ## Next steps
 
 - Persist workspace (SQLite / WatermelonDB / Convex sync)
-- Port remaining Swift screens (forms, outcome workspace, iPad split view)
+- Port Swift test coverage to Vitest (agenda, inbox, store mutations)
+- iPad split view and remaining Swift-only UX polish
 - Optional: `@10play/tentap-editor` if you need collaborative rich text later
