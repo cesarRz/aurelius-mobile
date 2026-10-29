@@ -108,7 +108,7 @@ struct DocumentEditorView: View {
             .navigationTitle(
                 store.docs[documentIndex].name
             )
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
 
         } else {
 

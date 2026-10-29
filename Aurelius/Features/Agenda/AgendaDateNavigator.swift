@@ -49,7 +49,7 @@ struct AgendaDateNavigator: View {
                     .datePickerStyle(.graphical)
                     .padding()
                     .navigationTitle("Choose date")
-                    .navigationBarTitleDisplayMode(.inline)
+                    .inlineNavigationTitle()
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Today") {

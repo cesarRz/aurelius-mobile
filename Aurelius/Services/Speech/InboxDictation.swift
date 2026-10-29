@@ -49,9 +49,11 @@ final class InboxDictation {
         }
 
         do {
+            #if os(iOS)
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.record, mode: .measurement, options: .duckOthers)
             try session.setActive(true)
+            #endif
             let input = engine.inputNode
             let format = input.outputFormat(forBus: 0)
             guard format.sampleRate > 0, format.channelCount > 0 else {
@@ -112,7 +114,9 @@ final class InboxDictation {
         isStarting = false
         audioLevels = Array(repeating: 0, count: 7)
         lastLevelUpdate = .distantPast
+        #if os(iOS)
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        #endif
     }
 
     private func fail(_ message: String) {

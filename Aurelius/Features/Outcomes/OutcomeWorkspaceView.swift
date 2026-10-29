@@ -199,7 +199,7 @@ struct OutcomeWorkspaceView: View {
                 )
             }
             .navigationTitle(outcome.name)
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Edit") {

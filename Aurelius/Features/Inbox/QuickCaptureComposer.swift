@@ -17,6 +17,14 @@ struct QuickCaptureComposer: View {
         !isDictating && !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    private var keyboardDidHide: NotificationCenter.Publisher {
+        #if os(iOS)
+        NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification)
+        #else
+        NotificationCenter.default.publisher(for: Notification.Name("AureliusNoKeyboardNotification"))
+        #endif
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             if dictation.isRecording {
@@ -77,9 +85,9 @@ struct QuickCaptureComposer: View {
                         topTrailingRadius: 22,
                         style: .continuous
                     )
-                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                    .fill(Color.appSecondaryGroupedBackground)
                     .frame(height: geo.size.height)
-                    Color(uiColor: .secondarySystemGroupedBackground)
+                    Color.appSecondaryGroupedBackground
                         .frame(height: 500)
                 }
             }
@@ -94,7 +102,7 @@ struct QuickCaptureComposer: View {
                 capture.finishClose()
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification)) { _ in
+        .onReceive(keyboardDidHide) { _ in
             guard !isDictating else { return }
             capture.handleKeyboardDidHide()
         }
@@ -144,7 +152,7 @@ struct QuickCaptureComposer: View {
 
     private var trailingForeground: Color {
         if dictation.isRecording { return .white }
-        if canSubmit { return Color(uiColor: .systemBackground) }
+        if canSubmit { return Color.appBackground }
         return .primary
     }
 

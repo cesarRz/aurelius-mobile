@@ -77,7 +77,7 @@ struct AgendaView: View {
                 }
             }
         }
-        .listSectionSpacing(20)
+        .compactSectionSpacing(20)
         .navigationTitle("Agenda")
         .fabDefault(.capture(.inbox))
         .onChange(of: store.areas.map(\.id)) { _, ids in

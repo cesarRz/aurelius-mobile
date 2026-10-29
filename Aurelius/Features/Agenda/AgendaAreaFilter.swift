@@ -26,7 +26,7 @@ struct AgendaAreaFilter: View {
             VStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.system(size: 19, weight: .medium))
-                    .foregroundStyle(selected ? Color(uiColor: .systemBackground) : .primary)
+                    .foregroundStyle(selected ? Color.appBackground : .primary)
                     .frame(width: 52, height: 52)
                     .background(selected ? Color.primary : Color.primary.opacity(0.05), in: Circle())
                 Text(title)

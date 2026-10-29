@@ -108,7 +108,7 @@ struct NoteEditorView: View {
             .navigationTitle(
                 store.notes[noteIndex].name
             )
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
 
         } else {
 

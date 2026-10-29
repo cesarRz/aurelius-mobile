@@ -45,7 +45,7 @@ struct PlanningHubView: View {
 
     private var tabletNavigation: some View {
         NavigationSplitView {
-            List(PlanningSection.allCases, selection: $section) { item in
+            List(PlanningSection.allCases, selection: Binding<PlanningSection?>(get: { section }, set: { if let newValue = $0 { section = newValue } })) { item in
                 Label(item.title, systemImage: item.icon)
                     .tag(item)
             }
