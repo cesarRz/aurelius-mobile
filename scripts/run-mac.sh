@@ -16,5 +16,8 @@ xcodebuild \
   build
 
 echo "→ Launching Aurelius..."
-pkill -x Aurelius 2>/dev/null || true
+if pgrep -x Aurelius >/dev/null; then
+  pkill -x Aurelius || true
+  while pgrep -x Aurelius >/dev/null; do sleep 0.1; done
+fi
 open "$APP_PATH"
