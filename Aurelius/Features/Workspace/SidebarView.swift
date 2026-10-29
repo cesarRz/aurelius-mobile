@@ -4,20 +4,22 @@ struct SidebarView: View {
     @Binding var tab: PhoneTab
 
     var body: some View {
-        List {
-            ForEach(PhoneTab.allCases, id: \.self) { item in
-                Button {
-                    tab = item
-                } label: {
-                    Label(item.title, systemImage: item.icon)
+        List(
+            PhoneTab.allCases,
+            selection: Binding<PhoneTab?>(
+                get: { tab },
+                set: { newValue in
+                    if let newValue { tab = newValue }
                 }
-                .foregroundStyle(tab == item ? Color.accentColor : Color.primary)
-                .listRowBackground(
-                    tab == item ? Color.accentColor.opacity(0.12) : Color.clear
-                )
-            }
+            )
+        ) { item in
+            Label(item.title, systemImage: item.icon)
+                .tag(item)
         }
         .listStyle(.sidebar)
         .navigationTitle("Aurelius")
+        #if os(macOS)
+        .navigationSplitViewColumnWidth(min: 180, ideal: 210, max: 260)
+        #endif
     }
 }
